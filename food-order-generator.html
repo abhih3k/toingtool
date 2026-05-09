@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Food Order Image Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Roboto',sans-serif;background:#f0f2f5;min-height:100vh;color:#333}
+header{background:#ff5200;padding:14px 24px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+header h1{color:#fff;font-size:20px;font-weight:700}
+header span{background:rgba(255,255,255,.2);color:#fff;font-size:11px;padding:3px 8px;border-radius:12px;font-weight:500}
+.container{display:flex;gap:24px;padding:24px;max-width:1200px;margin:0 auto;align-items:flex-start;flex-wrap:wrap}
+.form-panel{flex:1;min-width:300px;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}
+.form-panel-header{background:#ff5200;color:#fff;padding:14px 20px;font-size:15px;font-weight:600}
+.form-body{padding:20px}
+.form-group{margin-bottom:13px}
+.form-group label{display:block;font-size:11px;font-weight:700;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.form-group input{width:100%;border:1.5px solid #e0e0e0;border-radius:7px;padding:9px 11px;font-size:14px;font-family:'Roboto',sans-serif;transition:border-color .2s;outline:none}
+.form-group input:focus{border-color:#ff5200}
+.section-title{font-size:12px;font-weight:700;color:#ff5200;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.section-title::after{content:'';flex:1;height:1px;background:#ffe0cc}
+.cart-item-row{display:flex;gap:6px;margin-bottom:7px;align-items:center;background:#fff8f5;border-radius:7px;padding:7px}
+.cart-item-row input{border:1.5px solid #e0e0e0;border-radius:5px;padding:7px 9px;font-size:12px;font-family:'Roboto',sans-serif;outline:none}
+.cart-item-row input:focus{border-color:#ff5200}
+.ci-name{flex:1}
+.ci-qty{width:52px}
+.ci-price{width:72px}
+.remove-btn{background:none;border:none;color:#e53935;cursor:pointer;font-size:18px;padding:0 2px;line-height:1;flex-shrink:0}
+.add-btn{display:flex;align-items:center;gap:6px;background:#fff3ee;color:#ff5200;border:1.5px dashed #ff5200;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;width:100%;justify-content:center;margin-top:4px;transition:background .2s}
+.add-btn:hover{background:#ffe8dd}
+.generate-btn{width:100%;background:#ff5200;color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin-top:18px;transition:background .2s}
+.generate-btn:hover{background:#e64a00}
+.generate-btn:disabled{background:#aaa;cursor:not-allowed}
+
+/* PREVIEW PANEL */
+.preview-panel{flex:0 0 auto;width:340px}
+.preview-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;text-align:center}
+
+/* Phone wrapper - this is what we screenshot */
+#captureTarget{
+  width:320px;
+  margin:0 auto;
+  background:#1a1a1a;
+  border-radius:36px;
+  padding:8px;
+  font-family:'Roboto',sans-serif;
+}
+.phone-screen{background:#fff;border-radius:28px;overflow:hidden;}
+
+/* Status bar */
+.s-statusbar{background:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 18px 5px;font-size:11px;font-weight:700;color:#222}
+/* App header */
+.s-appheader{background:#fff;border-bottom:1px solid #f0f0f0;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.s-backbtn{font-size:20px;color:#333;font-weight:300;line-height:1;margin-right:8px}
+.s-restoname{font-size:14px;font-weight:700;color:#333;line-height:1.2}
+.s-addrline{font-size:10px;color:#666;margin-top:2px}
+.s-threedot{font-size:18px;color:#666;font-weight:700}
+/* Scroll area - NO max-height, let it grow */
+.s-scroll{background:#f5f5f5;}
+.s-savings-banner{background:#e8f5e9;padding:8px 14px;display:flex;align-items:center;gap:6px}
+.s-savings-text{font-size:11px;color:#2e7d32;font-weight:600}
+.s-orderfor-card{background:#fff;margin:7px;border-radius:9px;padding:11px 13px;border:1px solid #eee}
+.s-of-title{font-size:12px;font-weight:700;color:#333;margin-bottom:3px}
+.s-of-sub{font-size:11px;color:#666;line-height:1.5}
+.s-edit-btn{background:#ff5200;color:#fff;border:none;border-radius:5px;padding:5px 11px;font-size:11px;font-weight:700;margin-top:7px;display:inline-block}
+.s-section-hdr{background:#fff;padding:9px 14px 5px;font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.4px;border-top:5px solid #f5f5f5}
+.s-cart-item{background:#fff;padding:9px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f7f7f7}
+.s-ci-name{font-size:12px;font-weight:500;color:#333}
+.s-ci-qty{font-size:10px;color:#888;margin-top:1px}
+.s-ci-price{font-size:12px;font-weight:700;color:#333}
+.s-qty-ctrl{display:flex;align-items:center;border:1.5px solid #ff5200;border-radius:5px;overflow:hidden;margin-right:7px}
+.s-qty-btn{background:#fff;color:#ff5200;width:20px;height:20px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.s-qty-num{font-size:11px;font-weight:700;color:#ff5200;padding:0 5px;background:#fff3ee}
+.s-sug-item{background:#fff;margin:4px 7px;border-radius:9px;padding:9px 11px;display:flex;align-items:center;justify-content:space-between;border:1px solid #eee}
+.s-sug-name{font-size:11px;font-weight:500;color:#333}
+.s-sug-price{font-size:11px;color:#666}
+.s-sug-add{background:#fff;border:1.5px solid #ff5200;color:#ff5200;border-radius:5px;padding:4px 11px;font-size:10px;font-weight:700}
+.s-savings-corner{background:#fff;margin:7px;border-radius:9px;border:1px solid #eee;overflow:hidden}
+.s-sc-header{background:#fff8e1;padding:8px 12px;font-size:10px;font-weight:700;color:#f57f17}
+.s-payment{background:#fff;margin:7px;border-radius:9px;border:1px solid #eee;padding:11px 13px}
+.s-pay-row{display:flex;align-items:center;justify-content:space-between}
+.s-pay-label{font-size:11px;color:#666;font-weight:500}
+.s-pay-method{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#333}
+.s-upi-icon{color:#5f259f;font-size:11px}
+.s-pay-btn{background:#ff5200;color:#fff;margin:7px 7px 10px;border-radius:8px;padding:13px;font-size:14px;font-weight:700;text-align:center}
+
+.download-btn{width:100%;background:#1565c0;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
+.download-btn:hover{background:#0d47a1}
+.download-btn:disabled{background:#b0bec5;cursor:not-allowed}
+
+@media(max-width:720px){
+  .container{flex-direction:column;align-items:center}
+  .form-panel{width:100%;min-width:unset}
+  .preview-panel{width:100%}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍔 Food Order Image Generator</h1>
+  <span>Checkout Screenshot Tool</span>
+</header>
+
+<div class="container">
+
+  <!-- FORM PANEL -->
+  <div class="form-panel">
+    <div class="form-panel-header">📝 Enter Order Details</div>
+    <div class="form-body">
+      <div class="form-group"><label>Restaurant Name</label>
+        <input type="text" id="restaurantName" value="Demo Burger House" oninput="updatePreview()"/></div>
+      <div class="form-group"><label>Customer Name</label>
+        <input type="text" id="customerName" value="Demo User" oninput="updatePreview()"/></div>
+      <div class="form-group"><label>Delivery Address</label>
+        <input type="text" id="deliveryAddress" value="Flat No 101, Green Residency" oninput="updatePreview()"/></div>
+      <div class="form-group"><label>Phone Number</label>
+        <input type="text" id="phoneNumber" value="9876543210" oninput="updatePreview()"/></div>
+      <div class="form-group"><label>Order For (Recipient Name)</label>
+        <input type="text" id="orderFor" value="Rahul Verma" oninput="updatePreview()"/></div>
+      <div class="form-group"><label>Savings Text</label>
+        <input type="text" id="savingsText" value="&#8377;333 saved! Including membership benefits" oninput="updatePreview()"/></div>
+      <div class="form-group"><label>Payment Method</label>
+        <input type="text" id="paymentMethod" value="Demo UPI" oninput="updatePreview()"/></div>
+      <div class="form-group"><label>Total Pay Amount (&#8377;)</label>
+        <input type="number" id="totalAmount" value="50" oninput="updatePreview()"/></div>
+
+      <div class="section-title">Cart Products</div>
+      <div id="cartItemsForm"></div>
+      <button class="add-btn" onclick="addCartItem()">&#xff0b; Add Cart Product</button>
+
+      <div class="section-title">Suggested Products</div>
+      <div id="suggestedItemsForm"></div>
+      <button class="add-btn" onclick="addSuggestedItem()">&#xff0b; Add Suggested Product</button>
+
+      <button class="generate-btn" id="genBtn" onclick="doGenerate()">&#128247; Generate &amp; Download Image</button>
+    </div>
+  </div>
+
+  <!-- PREVIEW PANEL -->
+  <div class="preview-panel">
+    <div class="preview-label">Live Preview</div>
+
+    <div id="captureTarget">
+      <div class="phone-screen">
+
+        <div class="s-statusbar">
+          <span id="ph_time">21:12</span>
+          <span style="font-size:10px;color:#444;font-weight:600">100 KB/S 5G &#9646;&#9646; 27%</span>
+        </div>
+
+        <div class="s-appheader">
+          <div style="display:flex;align-items:center">
+            <span class="s-backbtn">&#8249;</span>
+            <div>
+              <div class="s-restoname" id="ph_restaurant">Demo Burger House</div>
+              <div class="s-addrline" id="ph_address">&#8962; Demo User | Flat No 101, Green Residency</div>
+            </div>
+          </div>
+          <span class="s-threedot">&#8942;</span>
+        </div>
+
+        <div class="s-scroll">
+
+          <div class="s-savings-banner">
+            <span style="font-size:13px">&#10023;</span>
+            <span class="s-savings-text" id="ph_savings">&#8377;333 saved! Including membership benefits</span>
+          </div>
+
+          <div class="s-orderfor-card">
+            <div class="s-of-title" id="ph_orderfor">You are ordering for Rahul Verma &#127873;</div>
+            <div class="s-of-sub">We will share order tracking and delivery communication on <strong id="ph_phone">9876543210</strong></div>
+            <div class="s-edit-btn">EDIT</div>
+          </div>
+
+          <div class="s-section-hdr">COMPLETE YOUR MEAL</div>
+          <div id="ph_suggested"></div>
+
+          <div class="s-section-hdr" style="margin-top:4px">YOUR ORDER</div>
+          <div id="ph_cart"></div>
+
+          <div class="s-savings-corner">
+            <div class="s-sc-header">&#127991; SAVINGS CORNER</div>
+          </div>
+
+          <div class="s-payment">
+            <div class="s-pay-row">
+              <span class="s-pay-label">PAY USING</span>
+              <span class="s-pay-method"><span class="s-upi-icon">&#9650;</span>&nbsp;<span id="ph_paymethod">Demo UPI</span></span>
+            </div>
+          </div>
+
+          <div class="s-pay-btn" id="ph_paybtn">Pay &#8377;50</div>
+
+        </div>
+      </div>
+    </div>
+
+    <button class="download-btn" id="dlBtn" onclick="doGenerate()">
+      &#128247; Generate &amp; Download Image
+    </button>
+  </div>
+
+</div>
+
+<script>
+var cartItems=[{name:'Classic Burger',qty:1,price:199},{name:'French Fries',qty:2,price:79}];
+var suggestedItems=[{name:'Cold Drink',price:49},{name:'Brownie',price:89}];
+
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escA(s){return (s||'').replace(/"/g,'&quot;');}
+
+function renderCartForm(){
+  var h='';
+  cartItems.forEach(function(it,i){
+    h+='<div class="cart-item-row">'
+      +'<input class="ci-name" type="text" placeholder="Item name" value="'+escA(it.name)+'" oninput="cartItems['+i+'].name=this.value;updatePreview()">'
+      +'<input class="ci-qty" type="number" placeholder="Qty" value="'+it.qty+'" min="1" oninput="cartItems['+i+'].qty=parseInt(this.value)||1;updatePreview()">'
+      +'<input class="ci-price" type="number" placeholder="&#8377;Price" value="'+it.price+'" min="0" oninput="cartItems['+i+'].price=parseFloat(this.value)||0;updatePreview()">'
+      +'<button class="remove-btn" onclick="removeCart('+i+')">&#215;</button>'
+      +'</div>';
+  });
+  document.getElementById('cartItemsForm').innerHTML=h;
+}
+function renderSuggestedForm(){
+  var h='';
+  suggestedItems.forEach(function(it,i){
+    h+='<div class="cart-item-row">'
+      +'<input class="ci-name" type="text" placeholder="Item name" value="'+escA(it.name)+'" oninput="suggestedItems['+i+'].name=this.value;updatePreview()">'
+      +'<input class="ci-price" type="number" placeholder="&#8377;Price" value="'+it.price+'" min="0" oninput="suggestedItems['+i+'].price=parseFloat(this.value)||0;updatePreview()">'
+      +'<button class="remove-btn" onclick="removeSuggested('+i+')">&#215;</button>'
+      +'</div>';
+  });
+  document.getElementById('suggestedItemsForm').innerHTML=h;
+}
+function addCartItem(){cartItems.push({name:'New Item',qty:1,price:0});renderCartForm();updatePreview();}
+function removeCart(i){cartItems.splice(i,1);renderCartForm();updatePreview();}
+function addSuggestedItem(){suggestedItems.push({name:'New Item',price:0});renderSuggestedForm();updatePreview();}
+function removeSuggested(i){suggestedItems.splice(i,1);renderSuggestedForm();updatePreview();}
+
+function updatePreview(){
+  var rName=document.getElementById('restaurantName').value||'Restaurant';
+  var cName=document.getElementById('customerName').value||'Customer';
+  var addr=document.getElementById('deliveryAddress').value||'Address';
+  var phone=document.getElementById('phoneNumber').value||'XXXXXXXXXX';
+  var orderFor=document.getElementById('orderFor').value||'Customer';
+  var savings=document.getElementById('savingsText').value||'';
+  var payMethod=document.getElementById('paymentMethod').value||'UPI';
+  var total=document.getElementById('totalAmount').value||'0';
+  var now=new Date();
+
+  document.getElementById('ph_time').textContent=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('ph_restaurant').textContent=rName;
+  document.getElementById('ph_address').innerHTML='&#8962; '+esc(cName)+' | '+esc(addr);
+  document.getElementById('ph_phone').textContent=phone;
+  document.getElementById('ph_orderfor').textContent='You are ordering for '+orderFor+' \uD83C\uDF81';
+  document.getElementById('ph_savings').textContent=savings;
+  document.getElementById('ph_paymethod').textContent=payMethod;
+  document.getElementById('ph_paybtn').textContent='Pay \u20B9'+total;
+
+  var cHtml='';
+  cartItems.forEach(function(it){
+    if(!it.name)return;
+    cHtml+='<div class="s-cart-item">'
+      +'<div><div class="s-ci-name">'+esc(it.name)+'</div><div class="s-ci-qty">Qty: '+it.qty+'</div></div>'
+      +'<div style="display:flex;align-items:center">'
+      +'<div class="s-qty-ctrl"><div class="s-qty-btn">\u2212</div><div class="s-qty-num">'+it.qty+'</div><div class="s-qty-btn">+</div></div>'
+      +'<div class="s-ci-price">\u20B9'+(it.price*it.qty)+'</div>'
+      +'</div></div>';
+  });
+  document.getElementById('ph_cart').innerHTML=cHtml||'<div style="padding:10px 14px;font-size:12px;color:#aaa">No items added</div>';
+
+  var sHtml='';
+  suggestedItems.forEach(function(it){
+    if(!it.name)return;
+    sHtml+='<div class="s-sug-item">'
+      +'<div><div class="s-sug-name">'+esc(it.name)+'</div><div class="s-sug-price">\u20B9'+it.price+'</div></div>'
+      +'<div class="s-sug-add">ADD</div>'
+      +'</div>';
+  });
+  document.getElementById('ph_suggested').innerHTML=sHtml;
+}
+
+function doGenerate(){
+  var genBtn=document.getElementById('genBtn');
+  var dlBtn=document.getElementById('dlBtn');
+  genBtn.textContent='\u23F3 Generating...';
+  genBtn.disabled=true;
+  dlBtn.textContent='\u23F3 Generating...';
+  dlBtn.disabled=true;
+
+  updatePreview();
+
+  // Small delay so DOM paints before capture
+  setTimeout(function(){
+    var target=document.getElementById('captureTarget');
+    var totalH=target.scrollHeight;
+    var totalW=target.offsetWidth;
+
+    html2canvas(target,{
+      scale:3,
+      useCORS:true,
+      allowTaint:true,
+      logging:false,
+      width:totalW,
+      height:totalH,
+      scrollX:0,
+      scrollY:-window.scrollY,
+      backgroundColor:'#1a1a1a',
+      onclone:function(doc){
+        // In the cloned document, remove ALL overflow/max-height constraints
+        // so nothing gets cut off
+        var ct=doc.getElementById('captureTarget');
+        ct.style.height='auto';
+        ct.style.overflow='visible';
+
+        var ps=ct.querySelector('.phone-screen');
+        if(ps){ps.style.overflow='visible';ps.style.height='auto';}
+
+        var sc=ct.querySelector('.s-scroll');
+        if(sc){sc.style.overflow='visible';sc.style.maxHeight='none';sc.style.height='auto';}
+
+        // Force all children to be visible
+        var all=ct.querySelectorAll('*');
+        for(var i=0;i<all.length;i++){
+          var el=all[i];
+          var cs=window.getComputedStyle(el);
+          if(cs.overflow==='hidden'||cs.overflow==='scroll'||cs.overflow==='auto'){
+            el.style.overflow='visible';
+          }
+          if(cs.maxHeight&&cs.maxHeight!=='none'){
+            el.style.maxHeight='none';
+          }
+        }
+      }
+    }).then(function(canvas){
+      var a=document.createElement('a');
+      a.download='food-order-checkout.png';
+      a.href=canvas.toDataURL('image/png');
+      a.click();
+
+      genBtn.textContent='\u2705 Downloaded!';
+      genBtn.disabled=false;
+      dlBtn.textContent='\u2705 Downloaded!';
+      dlBtn.disabled=false;
+      setTimeout(function(){
+        genBtn.textContent='\uD83D\uDCF7 Generate & Download Image';
+        dlBtn.textContent='\uD83D\uDCF7 Generate & Download Image';
+      },3000);
+    }).catch(function(err){
+      console.error('html2canvas error:',err);
+      genBtn.textContent='\uD83D\uDCF7 Generate & Download Image';
+      genBtn.disabled=false;
+      dlBtn.textContent='\uD83D\uDCF7 Generate & Download Image';
+      dlBtn.disabled=false;
+      alert('Could not generate screenshot. Please try again.');
+    });
+  },200);
+}
+
+renderCartForm();
+renderSuggestedForm();
+updatePreview();
+</script>
+</body>
+</html>
